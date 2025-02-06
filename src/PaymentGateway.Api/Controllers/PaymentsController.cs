@@ -1,7 +1,5 @@
 ﻿using FluentValidation;
-
 using Microsoft.AspNetCore.Mvc;
-
 using PaymentGateway.Api.HttpClients;
 using PaymentGateway.Api.Models;
 using PaymentGateway.Api.Models.Controllers.Requests;
@@ -14,7 +12,7 @@ namespace PaymentGateway.Api.Controllers;
 [Route("api/[controller]")]
 [ApiController]
 public class PaymentsController(
-    PaymentsRepository paymentsRepository,
+    IPaymentsRepository paymentsRepository,
     IValidator<PostPaymentRequest> postPaymentRequestValidator,
     IAcquiringBankClient acquiringBankClient)
     : Controller
@@ -24,7 +22,7 @@ public class PaymentsController(
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public ActionResult<PaymentResponse> GetPaymentAsync(Guid id)
+    public ActionResult<PaymentResponse> GetPayment(Guid id)
     {
         var payment = paymentsRepository.Get(id);
 
@@ -48,23 +46,21 @@ public class PaymentsController(
         {
             return BadRequest(result.Errors);
         }
-        
-        var processPaymentRequest = new ProcessPaymentRequest(cardNumber: postPaymentRequest.CardNumber,
-            expiryDate: $"{postPaymentRequest.ExpiryMonth:D2}/{postPaymentRequest.ExpiryYear:D4}",
-            amount: postPaymentRequest.Amount, currency: postPaymentRequest.Currency, cvv: postPaymentRequest.Cvv.ToString());
+
+        var processPaymentRequest = new ProcessPaymentRequest(postPaymentRequest.CardNumber,
+            $"{postPaymentRequest.ExpiryMonth:D2}/{postPaymentRequest.ExpiryYear:D4}",
+            postPaymentRequest.Currency, postPaymentRequest.Amount, postPaymentRequest.Cvv.ToString());
         
         var acquiringBankResponse = await acquiringBankClient.ProcessPaymentAsync(processPaymentRequest);
-        
-        var postPaymentResponse = new PaymentResponse
-        {
-            Id = string.IsNullOrEmpty(acquiringBankResponse.AuthorizationCode) ? Guid.NewGuid() : Guid.Parse(acquiringBankResponse.AuthorizationCode),
-            Status = acquiringBankResponse.Authorized ? PaymentStatus.Authorized : PaymentStatus.Declined,
-            CardNumberLastFour = int.Parse(postPaymentRequest.CardNumber[^4..]),
-            ExpiryMonth = postPaymentRequest.ExpiryMonth,
-            ExpiryYear = postPaymentRequest.ExpiryYear,
-            Currency = postPaymentRequest.Currency,
-            Amount = postPaymentRequest.Amount
-        };
+
+        var postPaymentResponse = new PaymentResponse(
+            string.IsNullOrEmpty(acquiringBankResponse.AuthorizationCode)
+                ? Guid.NewGuid()
+                : Guid.Parse(acquiringBankResponse.AuthorizationCode),
+            acquiringBankResponse.Authorized ? PaymentStatus.Authorized : PaymentStatus.Declined,
+            postPaymentRequest.CardNumber[^4..],
+            postPaymentRequest.ExpiryMonth, postPaymentRequest.ExpiryYear,
+            postPaymentRequest.Currency, postPaymentRequest.Amount);
         
         paymentsRepository.Add(postPaymentResponse);
 
