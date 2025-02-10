@@ -37,7 +37,7 @@ public class PaymentsServiceTests
         
         // Assert
         _paymentsRepository.Received(1).Get(Arg.Is(id));
-        Assert.Equal(payment.Id, result.Id);
+        Assert.Equal(payment, result);
     }
 
     [Fact]

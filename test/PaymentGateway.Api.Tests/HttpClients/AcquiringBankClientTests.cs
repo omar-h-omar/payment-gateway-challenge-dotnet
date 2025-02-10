@@ -18,8 +18,7 @@ public class AcquiringBankClientTests
         // Arrange
         var request = new ProcessPaymentRequest("2222405343248877", $"{_random.Next(1, 12) / _random.Next(2026, 2030)}",
             "GBP", _random.Next(1, 10000), _random.Next(001, 9999).ToString());
-        var expectedResponse = new ProcessPaymentResponse(true, Guid.NewGuid().ToString());
-        var client = SetupClient(HttpStatusCode.OK, expectedResponse);
+        var client = SetupClient(HttpStatusCode.OK, new ProcessPaymentResponse(true, Guid.NewGuid().ToString()));
         
         // Act
         var result = await client.ProcessPaymentAsync(request);
@@ -29,7 +28,7 @@ public class AcquiringBankClientTests
     }
     
     [Fact]
-    public async Task ProcessPaymentAsync_ThrowsProblemDetailsException_WhenResponseIsBadRequest()
+    public async Task ProcessPaymentAsync_ThrowsHttpRequestException_WhenResponseIsBadRequest()
     {
         // Arrange
         var request = new ProcessPaymentRequest("2222405343248877", $"{_random.Next(1, 12) / _random.Next(2026, 2030)}",
@@ -56,8 +55,7 @@ public class AcquiringBankClientTests
         {
             BaseAddress = new Uri(BaseUrl)
         };
-
-        var acquiringBankClient = new AcquiringBankClient(httpClient);
-        return acquiringBankClient;
+        
+        return new AcquiringBankClient(httpClient);
     }
 }
