@@ -6,6 +6,6 @@ namespace PaymentGateway.Api.Tests.HttpMocks.AcquiringBank;
 
 public static class Payment
 {
-    public static HttpMock GetMock() => new HttpMock("POST", "/payments", HttpStatusCode.OK,
+    public static HttpMock GetMock() => new("POST", "/payments", HttpStatusCode.OK,
         new ProcessPaymentResponse(true, Guid.NewGuid().ToString()), null);
 }

@@ -5,20 +5,15 @@ namespace PaymentGateway.Api.Tests.Validators;
 
 public class PostPaymentRequestValidatorTests
 {
-    private readonly PostPaymentRequestValidator _validator;
-    
-    public PostPaymentRequestValidatorTests()
-    {
-        _validator = new PostPaymentRequestValidator();
-    }
-    
+    private readonly PostPaymentRequestValidator _validator = new();
+
     [Theory]
     [InlineData(null, "'Card Number' must not be empty.")]
     [InlineData("", "'Card Number' must not be empty.")]
     [InlineData(" ", "'Card Number' must not be empty.")]
     [InlineData("1", "'Card Number' must be between 14 and 19 characters. You entered 1 characters.")]
     [InlineData("12345678901234567890", "'Card Number' must be between 14 and 19 characters. You entered 20 characters.")]
-    [InlineData("a", "Card number must only contain numeric characters")]
+    [InlineData("aaaaaaaaaaaaaa", "Card number must only contain numeric characters")]
     public async Task ValidateAsync_ReturnsFalse_WhenCardNumberIsInvalid(string cardNumber, string expectedError)
     {
         // Arrange
@@ -33,7 +28,10 @@ public class PostPaymentRequestValidatorTests
     }
     
     [Theory]
-    [InlineData(0, 2025, "'Expiry Month' must be between 1 and 12. You entered 0.")]
+    [InlineData(null, 2025, "'Expiry Month' must not be empty.")]
+    [InlineData(0, 2025, "'Expiry Month' must not be empty.")]
+    [InlineData(4, 0, "'Expiry Year' must not be empty.")]
+    [InlineData(4, null, "'Expiry Year' must not be empty.")]
     [InlineData(13, 2025, "'Expiry Month' must be between 1 and 12. You entered 13.")]
     [InlineData(4, 1990, "Payment date must be in the future")]
     public async Task ValidateAsync_ReturnsFalse_WhenPaymentDateIsInvalid(int expiryMonth, int expiryYear, string expectedError)
@@ -52,6 +50,7 @@ public class PostPaymentRequestValidatorTests
     [Theory]
     [InlineData(null, "'Currency' must not be empty.")]
     [InlineData("", "'Currency' must not be empty.")]
+    [InlineData(" ", "'Currency' must not be empty.")]
     [InlineData("test", "Currency must be GBP, USD or EUR")]
     public async Task ValidateAsync_ReturnsFalse_WhenCurrencyIsInvalid(string currency, string expectedError)
     {
@@ -88,6 +87,7 @@ public class PostPaymentRequestValidatorTests
     [InlineData(" ", "'Cvv' must not be empty.")]
     [InlineData("1", "'Cvv' must be between 3 and 4 characters. You entered 1 characters.")]
     [InlineData("12345", "'Cvv' must be between 3 and 4 characters. You entered 5 characters.")]
+    [InlineData("cvv", "Cvv must only contain numeric characters")]
     public async Task ValidateAsync_ReturnsFalse_WhenCvvIsInvalid(string cvv, string expectedError)
     {
         // Arrange

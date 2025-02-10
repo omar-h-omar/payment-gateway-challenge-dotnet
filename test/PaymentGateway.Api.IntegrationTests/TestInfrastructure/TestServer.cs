@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using PaymentGateway.Api.Services;
+using PaymentGateway.Api.Repositories;
 
 namespace PaymentGateway.Api.Tests.TestInfrastructure;
 
-public class TestServer :  IAsyncLifetime
+public class TestServer : IAsyncLifetime
 {
     public HttpClient Client;
     public IPaymentsRepository PaymentsRepository;

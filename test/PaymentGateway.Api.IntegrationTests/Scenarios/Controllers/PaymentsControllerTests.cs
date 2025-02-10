@@ -1,6 +1,5 @@
 ﻿using System.Net;
 using System.Net.Http.Json;
-using PaymentGateway.Api.Models;
 using PaymentGateway.Api.Models.Controllers.Requests;
 using PaymentGateway.Api.Models.Controllers.Responses;
 using PaymentGateway.Api.Tests.HttpMocks.AcquiringBank;
@@ -26,7 +25,7 @@ public class PaymentsControllerTests(TestServer testServer) : IClassFixture<Test
         
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.NotNull(paymentResponse);
+        Assert.Equal(payment.Id, paymentResponse.Id);
     }
 
     [Fact]
@@ -59,8 +58,10 @@ public class PaymentsControllerTests(TestServer testServer) : IClassFixture<Test
         
         // Act
         var response = await testServer.Client.PostAsJsonAsync("/api/Payments", postPaymentRequest);
+        var paymentResponse = await response.Content.ReadFromJsonAsync<PaymentResponse>();
         
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(postPaymentRequest.CardNumber[^4..], paymentResponse.CardNumberLastFour);
     }
 }
