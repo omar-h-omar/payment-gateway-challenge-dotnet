@@ -12,6 +12,9 @@ graph LR;
     C[Payment Gateway]<-->D[Acquiring Bank];
 ```
 
+## Assumptions
+* I've assumed that the requirement to return a Rejected response to the merchant when a request has invalid information means to return a BadRequest response instead of returning a payment response with the status Rejected.
+
 ## Design and Rationale
 The service is divided into separate folders for Controllers, Services, Repositories, HttpClients, and Models. Separating the folders ensures we maintain a clean hierarchy and makes it easy to traverse the service. The folders contain the following:
 
@@ -56,3 +59,7 @@ In terms of extending this service for real world use, I think the following imp
 * The models should be updated to include identifier for the merchant and shopper. This would enable us to ensure a merchant can only fetch payments related to them. Likewise, merchants would be able to use the shopper identifier to learn more about their transactions. For example, identifying loyal customers.
   
 * We should introduce contract testing and request versioning at our service boundaries. This ensures any updates to our request models will be backwards compatible and any breaking changes will be introduced as part of a new api major version.
+
+* We should introduce metrics and distributred tracing to the service. This will allow us to have better visibility on the health of the service and make it easier to trace the root cause of any bugs we might encounter.
+
+* Given the sensitive nature of the data being transmitted, we introduce encryption for data in transfer
