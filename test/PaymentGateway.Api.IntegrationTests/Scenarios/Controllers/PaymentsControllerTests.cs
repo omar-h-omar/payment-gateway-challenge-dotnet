@@ -42,7 +42,7 @@ public class PaymentsControllerTests(TestServer testServer) : IClassFixture<Test
     public async Task PostPaymentAsync_ReturnsBadRequest_WhenRequestIsNotValid()
     {
         // Act
-        var response = await testServer.Client.PostAsJsonAsync<PostPaymentRequest>("/api/Payments", null!);
+        var response = await testServer.Client.PostAsJsonAsync<PostPaymentRequest>("/api/Payments", null);
         
         // Assert
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);

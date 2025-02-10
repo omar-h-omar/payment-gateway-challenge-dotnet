@@ -46,7 +46,7 @@ public class PaymentsControllerTests
         await _controller.PostPaymentAsync(request);
         
         // Assert
-        await _validator.Received(1).ValidateAsync(request);
+        await _validator.Received(1).ValidateAsync(Arg.Is(request));
     }
     
     [Fact]
@@ -61,7 +61,7 @@ public class PaymentsControllerTests
         await _controller.PostPaymentAsync(request);
         
         // Assert
-        await _paymentsService.Received(1).ProcessPaymentAsync(request);
+        await _paymentsService.Received(1).ProcessPaymentAsync(Arg.Is(request));
     }
     
     [Fact]
@@ -76,6 +76,6 @@ public class PaymentsControllerTests
         await _controller.PostPaymentAsync(request);
         
         // Assert
-        await _paymentsService.DidNotReceive().ProcessPaymentAsync(request);
+        await _paymentsService.DidNotReceive().ProcessPaymentAsync(Arg.Any<PostPaymentRequest>());
     }
 }
